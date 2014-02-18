@@ -12,7 +12,9 @@ module MyMongoid
     end
   end
 
+
   extend MyMongoid::Config
+
 
   # This is the base module for all domain objects
   module Document
@@ -22,9 +24,29 @@ module MyMongoid
       end
     end
 
+    # Attributes
+    attr_reader :attributes
+
     def self.included(klass)
       klass.extend(ClassMethods)
       MyMongoid.register_model(klass)
+    end
+
+    def initialize(attrs = nil)
+      raise ArgumentError unless attrs.is_a?(Hash)
+      @attributes = attrs
+    end
+
+    def read_attribute(name)
+      @attributes[name]
+    end
+
+    def write_attribute(name, value)
+      @attributes[name] = value
+    end
+
+    def new_record?
+      true
     end
   end
 end
