@@ -28,6 +28,7 @@ module MyMongoid
       # Fields
       def field(name, options = {})
         named = name.to_s
+        @attributes ||= {}
 
         define_method(named) { @attributes[named] }
 
@@ -36,9 +37,8 @@ module MyMongoid
         end
 
         # add field to class variable @fields
-        add_field(named)
+        add_field(named, options)
       end
-
 
       def fields
         @fields ||= {}
@@ -47,7 +47,7 @@ module MyMongoid
       def add_field(name, options = {})
         @fields ||= {}
         raise DuplicateFieldError if @fields.include?(name)
-        @fields[name] = MyMongoid::Field.new(name)
+        @fields[name] = MyMongoid::Field.new(name, options)
       end
     end
 
@@ -59,14 +59,31 @@ module MyMongoid
       MyMongoid.register_model(klass)
     end
 
-
     # Attributes
     attr_reader :attributes
 
     def initialize(attrs = nil)
       raise ArgumentError unless attrs.is_a?(Hash)
-      @attributes = attrs
+      @attributes = {}
+      process_attributes(attrs)
     end
+
+    def method_missing(meth,*args, &block)
+      if meth.to_s =~ /.*=/
+          raise UnknownAttributeError
+      end
+    end
+
+    def process_attributes(attrs = nil)
+      attrs ||= {}
+      if !attrs.empty?
+        attrs.each_pair do |name, value|
+          send("#{name}=", value)
+        end
+      end
+    end
+
+    alias :attributes= :process_attributes
 
     def read_attribute(name)
       @attributes[name]
@@ -84,14 +101,19 @@ module MyMongoid
 
 
   class Field
-    attr_accessor :name
+    attr_accessor :name, :options
 
-    def initialize(name)
+    def initialize(name, options)
       @name = name
+      @options = options
     end
   end
 
 
   class DuplicateFieldError < RuntimeError
+  end
+
+
+  class UnknownAttributeError < RuntimeError
   end
 end
