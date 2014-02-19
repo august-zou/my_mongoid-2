@@ -1,21 +1,8 @@
 require "my_mongoid/version"
+require "my_mongoid/config"
+require "my_mongoid/errors"
 
 module MyMongoid
-
-  # This module defines all the configuration options for Mongoid
-  module Config
-    def models
-      @models ||= []
-    end
-
-    def register_model(klass)
-      @models.push(klass) unless models.include?(klass)
-    end
-  end
-
-
-  extend MyMongoid::Config
-
 
   # This is the base module for all domain objects
   module Document
@@ -30,7 +17,7 @@ module MyMongoid
         named = name.to_s
         aliaed = options[:as]
 
-        create_accessors(named, name, options)
+        create_accessors(named, named, options)
         create_accessors(named, aliaed, options) if aliaed
 
         # add field to class variable @fields
@@ -49,8 +36,8 @@ module MyMongoid
 
       def create_accessors(name, meth, options={})
         @attributes ||= {}
-        name = name.to_s
         meth = meth.to_s
+        name = name.to_s
 
         define_method(meth) { @attributes[name] }
 
@@ -68,6 +55,7 @@ module MyMongoid
       klass.create_accessors(:_id, :id)
       MyMongoid.register_model(klass)
     end
+
 
     # Attributes
     attr_reader :attributes
@@ -117,13 +105,5 @@ module MyMongoid
       @name = name
       @options = options
     end
-  end
-
-
-  class DuplicateFieldError < RuntimeError
-  end
-
-
-  class UnknownAttributeError < RuntimeError
   end
 end
