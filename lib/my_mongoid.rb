@@ -28,13 +28,10 @@ module MyMongoid
       # Fields
       def field(name, options = {})
         named = name.to_s
-        @attributes ||= {}
+        aliaed = options[:as]
 
-        define_method(named) { @attributes[named] }
-
-        define_method(named + '=') do |value|
-          @attributes[named] = value
-        end
+        create_accessors(named, name, options)
+        create_accessors(named, aliaed, options) if aliaed
 
         # add field to class variable @fields
         add_field(named, options)
@@ -49,6 +46,18 @@ module MyMongoid
         raise DuplicateFieldError if @fields.include?(name)
         @fields[name] = MyMongoid::Field.new(name, options)
       end
+
+      def create_accessors(name, meth, options={})
+        @attributes ||= {}
+        name = name.to_s
+        meth = meth.to_s
+
+        define_method(meth) { @attributes[name] }
+
+        define_method(meth + '=') do |value|
+          @attributes[name] = value
+        end
+      end
     end
 
 
@@ -56,6 +65,7 @@ module MyMongoid
     def self.included(klass)
       klass.extend(ClassMethods)
       klass.field(:_id)
+      klass.create_accessors(:_id, :id)
       MyMongoid.register_model(klass)
     end
 
