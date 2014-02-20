@@ -1,5 +1,5 @@
 # MyMongoid
-[![Build Status](https://travis-ci.org/shaoyanmin/my_mongoid.png?branch=master)](https://travis-ci.org/shaoyanmin/my_mongoid)
+[![Build Status](https://travis-ci.org/shaoyanmin/my_mongoid.png?branch=master)](https://travis-ci.org/shaoyanmin/my_mongoid) [![Coverage Status](https://coveralls.io/repos/shaoyanmin/my_mongoid/badge.png)](https://coveralls.io/r/shaoyanmin/my_mongoid)
 
 TODO: Write a gem description
 

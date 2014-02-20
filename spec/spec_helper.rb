@@ -82,3 +82,10 @@ RSpec.configure do |config|
 end
 
 require "my_mongoid"
+
+if ENV["CI"]
+  require "coveralls"
+  Coveralls.wear! do
+    add_filter "spec"
+  end
+end
