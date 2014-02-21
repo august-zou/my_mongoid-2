@@ -7,7 +7,6 @@ module MyMongoid
   module Document
 
     attr_reader :attributes
-    alias :attributes= :process_attributes
 
     module ClassMethods
       def is_mongoid_model?
@@ -77,6 +76,8 @@ module MyMongoid
         end
       end
     end
+
+    alias :attributes= :process_attributes
 
     def read_attribute(name)
       @attributes[name]
