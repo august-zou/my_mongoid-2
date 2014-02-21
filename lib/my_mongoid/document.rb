@@ -6,6 +6,9 @@ module MyMongoid
   # This is the base module for all domain objects
   module Document
 
+    attr_reader :attributes
+    alias :attributes= :process_attributes
+
     module ClassMethods
       def is_mongoid_model?
         true
@@ -33,7 +36,6 @@ module MyMongoid
       end
 
       def create_accessors(name, meth, options={})
-        @attributes ||= {}
         meth = meth.to_s
         name = name.to_s
 
@@ -55,9 +57,6 @@ module MyMongoid
     end
 
 
-    # Attributes
-    attr_reader :attributes
-
     def initialize(attrs = nil)
       raise ArgumentError unless attrs.is_a?(Hash)
       @attributes = {}
@@ -78,8 +77,6 @@ module MyMongoid
         end
       end
     end
-
-    alias :attributes= :process_attributes
 
     def read_attribute(name)
       @attributes[name]
