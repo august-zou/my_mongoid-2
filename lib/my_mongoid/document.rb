@@ -60,6 +60,10 @@ module MyMongoid
       raise ArgumentError unless attrs.is_a?(Hash)
       @attributes = {}
       process_attributes(attrs)
+      defaults = self.class.fields.inject({}) do |c, (k, v)|
+        c[k] = v.default_val; c
+      end
+      @attributes = defaults.merge(@attributes)
     end
 
     def method_missing(meth,*args, &block)
@@ -90,16 +94,16 @@ module MyMongoid
     def new_record?
       true
     end
-
   end
 
 
   class Field
-    attr_accessor :name, :options
+    attr_accessor :name, :options, :default_val
 
-    def initialize(name, options)
+    def initialize(name, options={})
       @name = name
       @options = options
+      @default_val = options[:default]
     end
   end
 end
