@@ -59,7 +59,9 @@ module MyMongoid
     def initialize(attrs = nil)
       raise ArgumentError unless attrs.is_a?(Hash)
       @attributes = {}
-      process_attributes(attrs)
+      process_attributes(attrs) do
+        yield self if block_given?
+      end
       defaults = self.class.fields.inject({}) do |c, (k, v)|
         c[k] = v.default_val; c
       end
@@ -79,6 +81,7 @@ module MyMongoid
           send("#{name}=", value)
         end
       end
+      yield self if block_given?
     end
 
     alias :attributes= :process_attributes
