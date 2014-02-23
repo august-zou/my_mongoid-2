@@ -1,5 +1,4 @@
 module MyMongoid
-
   # This module defines all the configuration options for Mongoid
   module Config
     def models
@@ -10,7 +9,6 @@ module MyMongoid
       @models.push(klass) unless models.include?(klass)
     end
   end
-
 
   extend MyMongoid::Config
 end

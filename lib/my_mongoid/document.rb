@@ -1,11 +1,9 @@
-require "my_mongoid/config"
-require "my_mongoid/errors"
+require 'my_mongoid/config'
+require 'my_mongoid/errors'
 
 module MyMongoid
-
   # This is the base module for all domain objects
   module Document
-
     attr_reader :attributes
 
     module ClassMethods
@@ -46,7 +44,6 @@ module MyMongoid
       end
     end
 
-
     # extend the mixed class's class method
     def self.included(klass)
       klass.extend(ClassMethods)
@@ -54,7 +51,6 @@ module MyMongoid
       klass.create_accessors(:_id, :id)
       MyMongoid.register_model(klass)
     end
-
 
     def initialize(attrs = nil)
       raise ArgumentError unless attrs.is_a?(Hash)
@@ -68,15 +64,14 @@ module MyMongoid
       @attributes = defaults.merge(@attributes)
     end
 
-    def method_missing(meth,*args, &block)
-      if meth.to_s =~ /.*=/
-          raise UnknownAttributeError
-      end
+    def method_missing(meth, *args, &block)
+      raise UnknownAttributeError if meth.to_s =~ /.*=/
+      super
     end
 
     def process_attributes(attrs = nil)
       attrs ||= {}
-      if !attrs.empty?
+      unless attrs.empty?
         attrs.each_pair do |name, value|
           send("#{name}=", value)
         end
@@ -99,11 +94,10 @@ module MyMongoid
     end
   end
 
-
   class Field
     attr_accessor :name, :options, :default_val
 
-    def initialize(name, options={})
+    def initialize(name, options = {})
       @name = name
       @options = options
       @default_val = options[:default]
