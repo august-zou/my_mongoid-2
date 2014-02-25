@@ -1,3 +1,5 @@
+require 'moped'
+
 module MyMongoid
   # This module defines all the configuration options for Mongoid
   module Config
@@ -15,6 +17,12 @@ module MyMongoid
 
     def configure(&block)
       yield(configuration)
+    end
+
+    def session(host = [], options = {})
+      # TODO: add config here
+      raise UnconfiguredDatabaseError if host == [] || options[:database].nil?
+      @session ||= Moped::Session.new(host, :database => options[:database])
     end
   end
 
