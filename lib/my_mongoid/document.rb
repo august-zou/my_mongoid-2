@@ -1,10 +1,12 @@
 require 'my_mongoid/config'
 require 'my_mongoid/errors'
+require 'active_support/inflector'
 
 module MyMongoid
   # This is the base module for all domain objects
   module Document
     attr_reader :attributes
+    attr_accessor :persisted # state
 
     module ClassMethods
       def is_mongoid_model?
@@ -42,6 +44,22 @@ module MyMongoid
           @attributes[name] = value
         end
       end
+
+      # Collection name
+      def collection_name
+        name.tableize
+      end
+
+      def collection
+        MyMongoid.session[collection_name]
+      end
+
+      # persistable
+      def create(attr = {})
+        model = self.new(attr)
+        model.save
+        model
+      end
     end
 
     # extend the mixed class's class method
@@ -55,6 +73,7 @@ module MyMongoid
     def initialize(attrs = nil)
       raise ArgumentError unless attrs.is_a?(Hash)
       @attributes = {}
+      @persisted = false
       process_attributes(attrs) do
         yield self if block_given?
       end
@@ -90,8 +109,25 @@ module MyMongoid
     end
 
     def new_record?
-      true
+      !@persisted
     end
+
+    def to_document
+      @attributes
+    end
+
+    def collection
+      self.class.collection
+    end
+
+    # persistable
+    def save
+      @attributes["_id"] ||= BSON::ObjectId.new
+      document = collection.insert(to_document)
+      @persisted = !document.nil?
+    end
+
+
   end
 
   class Field

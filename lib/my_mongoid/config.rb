@@ -1,4 +1,5 @@
 require 'moped'
+require 'singleton'
 
 module MyMongoid
   # This module defines all the configuration options for Mongoid
@@ -12,19 +13,29 @@ module MyMongoid
     end
 
     def configuration
-      MyMongoid::Configuration.instance
+      Configuration.instance
     end
 
     def configure(&block)
+      # this method should receive a block
+      # the Configuration singleton would be set with options
       yield(configuration)
     end
 
-    def session(host = [], options = {})
-      # TODO: add config here
-      raise UnconfiguredDatabaseError if host == [] || options[:database].nil?
-      @session ||= Moped::Session.new(host, :database => options[:database])
+    def session
+      host = configuration.host
+      host = [host] unless host.is_a? Array
+      database = configuration.database
+      raise UnconfiguredDatabaseError if host.nil? || database.nil?
+      @session ||= Moped::Session.new(host, :database => database)
     end
+
   end
 
   extend MyMongoid::Config
+
+  class Configuration
+    include Singleton
+    attr_accessor :host, :database
+  end
 end
