@@ -1,10 +1,14 @@
 require 'my_mongoid/config'
 require 'my_mongoid/errors'
-require 'active_support/inflector'
+require 'my_mongoid/persistable'
 
 module MyMongoid
   # This is the base module for all domain objects
   module Document
+    extend ActiveSupport::Concern
+
+    include Persistable
+
     attr_reader :attributes
     attr_accessor :persisted # state
 
@@ -54,12 +58,6 @@ module MyMongoid
         MyMongoid.session[collection_name]
       end
 
-      # persistable
-      def create(attr = {})
-        model = self.new(attr)
-        model.save
-        model
-      end
     end
 
     # extend the mixed class's class method
@@ -119,15 +117,6 @@ module MyMongoid
     def collection
       self.class.collection
     end
-
-    # persistable
-    def save
-      @attributes["_id"] ||= BSON::ObjectId.new
-      document = collection.insert(to_document)
-      @persisted = !document.nil?
-    end
-
-
   end
 
   class Field
