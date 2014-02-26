@@ -199,24 +199,52 @@ describe MyMongoid do
 
   describe "should be able to find a record" do
     describe "Model.instantiate" do
+      let(:attrs) {
+        { "id" => "abc", "a" => 10 }
+      }
+      let(:bar) {
+        BarModel.instantiate(attrs)
+      }
       it "should return a model instance" do
+        expect(bar).to be_a(BarModel)
       end
 
       it "should return an instance that's not a new_record" do
+        expect(bar).not_to be_new_record
       end
 
       it "should have the given attributes" do
+        expect(bar.attributes).to eq(attrs)
       end
     end
 
     describe "Model.find" do
+      let(:attrs) {
+        { "_id" => 1, "a" => 10, "b" => 20 }
+      }
+      before {
+        config_db
+        clean_db
+        BarModel.create(attrs)
+      }
+
       it "should be able to find a record by issuing query" do
+        bar = BarModel.find({"_id" => 1})
+        expect(bar).to be_a(BarModel)
+        expect(bar.attributes).to eq(attrs)
       end
 
       it "should be able to find a record by issuing shorthand id query" do
+        bar = BarModel.find(1)
+        expect(bar).to be_a(BarModel)
+        expect(bar.attributes).to eq(attrs)
       end
 
       it "should raise Mongoid::RecordNotFoundError if nothing is found for an id" do
+        expect {
+          bar = BarModel.find("unknown")
+          puts bar.inspect
+        }.to raise_error(MyMongoid::RecordNotFoundError)
       end
     end
   end

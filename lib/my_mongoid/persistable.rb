@@ -4,11 +4,27 @@ module MyMongoid
     extend ActiveSupport::Concern
 
     module ClassMethods
-      def create(attr = {})
-        model = self.new(attr)
+      def create(attrs = {})
+        model = self.new(attrs)
         model.save
         model
       end
+
+      def instantiate(attrs = nil)
+        attributes = attrs || {}
+        doc = allocate
+        doc.instance_variable_set(:@attributes, attributes)
+        doc.instance_variable_set(:@persisted, true)
+        doc
+      end
+
+      def find(selector)
+        query = selector.is_a?(Hash) ? selector : { "_id" => selector }
+        result = collection.find(query).first
+        raise MyMongoid::RecordNotFoundError if result.nil?
+        instantiate(result)
+      end
+
     end
 
     def save

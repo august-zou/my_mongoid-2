@@ -7,4 +7,7 @@ module MyMongoid
 
   class UnconfiguredDatabaseError < RuntimeError
   end
+
+  class RecordNotFoundError < RuntimeError
+  end
 end
