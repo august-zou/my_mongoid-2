@@ -243,7 +243,6 @@ describe MyMongoid do
       it "should raise Mongoid::RecordNotFoundError if nothing is found for an id" do
         expect {
           bar = BarModel.find("unknown")
-          puts bar.inspect
         }.to raise_error(MyMongoid::RecordNotFoundError)
       end
     end

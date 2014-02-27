@@ -129,7 +129,6 @@ module MyMongoid
       return {} if new_record?
       updates = changed_attributes.select {|k, v| k != '_id' }
       updates.each { |k, v| updates[k] = attributes[k] }
-      puts changed_attributes
       updates.empty? ? {} : { "$set" => updates }
     end
 
