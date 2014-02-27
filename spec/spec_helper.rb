@@ -82,6 +82,9 @@ RSpec.configure do |config|
 end
 
 require "my_mongoid"
+require "moped"
+require 'active_support/core_ext'
+require 'active_support/inflector'
 
 if ENV["CI"]
   require "coveralls"

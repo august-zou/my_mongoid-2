@@ -4,4 +4,10 @@ module MyMongoid
 
   class UnknownAttributeError < RuntimeError
   end
+
+  class UnconfiguredDatabaseError < RuntimeError
+  end
+
+  class RecordNotFoundError < RuntimeError
+  end
 end
