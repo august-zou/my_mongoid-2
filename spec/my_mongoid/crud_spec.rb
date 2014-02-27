@@ -249,4 +249,141 @@ describe MyMongoid do
     end
   end
 
+  describe "Should be able to update a record" do
+    describe "#changed_attributes" do
+      before(:all) { config_db }
+
+      before {
+        clean_db
+      }
+
+      it "should be an empty hash initially" do
+        bar = BarModel.new({})
+        expect(bar.changed_attributes).to eq({})
+      end
+
+      it "should track writes to attributes" do
+        bar = BarModel.create({ "a" => 10, "b" => 20 })
+        bar.a = 11
+        expect(bar.changed_attributes.keys).to include("a")
+      end
+
+      it "should keep the original attribute values" do
+        bar = BarModel.create({ "a" => 10, "b" => 20 })
+        bar.a = 11
+        expect(bar.changed_attributes["a"]).to eq(10)
+      end
+
+      it "should not make a field dirty if the assigned value is equaled to the old one" do
+        bar = BarModel.create({ "a" => 10, "b" => 20 })
+        bar.a = 10
+        expect(bar.changed_attributes.keys).not_to include("a")
+      end
+
+      context "when we assigned a different value" do
+        it "we could 'clean' a field by assigning equaled value" do
+          pending
+          bar = BarModel.create({ "a" => 10, "b" => 20 })
+          bar.a = 11 # make "a" dirty
+          bar.a = 10 # this should make "a" clean
+          expect(bar.changed_attributes.keys).not_to include("a")
+        end
+      end
+
+    end
+
+    context "updating database" do
+      before(:all) { config_db }
+
+      let(:barr) {
+        BarModel.create({ "a" => 1 })
+      }
+
+      describe "#save" do
+        it "should have no changes right after persisting" do
+          bar = BarModel.create({ "a" => 1 })
+          expect(bar).not_to be_changed
+        end
+
+        it "should save the changes if a document is already persisted" do
+          barr.a = 2
+          barr.save
+          count = BarModel.collection.find({ "a" => 2 }).count()
+          expect(count).to eq(1)
+        end
+      end
+
+      describe "#update_document" do
+        it "should not issue query if nothing changed" do
+          barr.a = 1
+          barr.update_document
+          expect_any_instance_of(Moped::Query).not_to receive(:update)
+        end
+
+        it "should update the document in database if there are changes" do
+          barr.a = 3
+          barr.update_document
+          count = BarModel.collection.find({ "a" => 3 }).count()
+          expect(count).to eq(1)
+        end
+      end
+
+      describe "#update_attributes" do
+        it "should change and persist attributes of a record" do
+          barr.update_attributes({ "a" => 4 })
+          count = BarModel.collection.find({ "a" => 4 }).count()
+          expect(count).to eq(1)
+        end
+      end
+    end
+
+    describe "#atomic_updates" do
+      before(:all) { config_db }
+      it "should return {} if nothing changed" do
+        bar = BarModel.create({ "a" => 1 })
+        expect(bar.atomic_updates).to eq({})
+      end
+
+      it "should return {} if record is not a persisted document" do
+        bar = BarModel.new({ "a" => 10 })
+        expect(bar.atomic_updates).to eq({})
+      end
+
+      it "should generate the $set update operation to update a persisted document" do
+        bar = BarModel.create({ "a" => 1 })
+        bar.a = 2
+        expect(bar.atomic_updates["$set"]).to eq({ "a" => 2 })
+      end
+    end
+  end
+
+  describe "Should track changes made to a record" do
+    describe "#changed?" do
+      before(:all) { config_db }
+
+      it "should be false for a newly instantiated record" do
+        bar = BarModel.new({ "a" => 1 })
+        expect(bar).not_to be_changed
+      end
+
+      it "should be true if a field changed" do
+        bar = BarModel.create({ "a" => 1 })
+        another_bar = BarModel.create({ "a" => 1 })
+        bar.a = 2; another_bar.a = 1
+        expect(bar).to be_changed
+        expect(another_bar).not_to be_changed
+      end
+    end
+  end
+
+  describe "Should be able to delete a record" do
+    describe "#delete" do
+      it "should delete a record from db" do
+      end
+
+      it "should return true for deleted?" do
+      end
+    end
+  end
+
 end
