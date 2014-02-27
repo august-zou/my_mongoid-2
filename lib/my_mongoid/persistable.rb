@@ -14,7 +14,7 @@ module MyMongoid
         attributes = attrs || {}
         doc = allocate
         doc.instance_variable_set(:@attributes, attributes)
-        doc.instance_variable_set(:@persisted, true)
+        doc.instance_variable_set(:@new_record, false)
         doc
       end
 
