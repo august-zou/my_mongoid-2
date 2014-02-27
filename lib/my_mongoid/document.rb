@@ -10,7 +10,7 @@ module MyMongoid
     include Persistable
 
     attr_reader :attributes
-    attr_accessor :persisted # state
+    attr_accessor :new_record # state
 
     module ClassMethods
       def is_mongoid_model?
@@ -71,7 +71,7 @@ module MyMongoid
     def initialize(attrs = nil)
       raise ArgumentError unless attrs.is_a?(Hash)
       @attributes = {}
-      @persisted = false
+      @new_record = true
       process_attributes(attrs) do
         yield self if block_given?
       end
@@ -107,7 +107,7 @@ module MyMongoid
     end
 
     def new_record?
-      !@persisted
+      @new_record
     end
 
     def to_document

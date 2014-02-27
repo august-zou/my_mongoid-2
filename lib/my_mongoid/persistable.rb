@@ -30,7 +30,8 @@ module MyMongoid
     def save
       @attributes["_id"] ||= BSON::ObjectId.new
       document = collection.insert(to_document)
-      @persisted = !document.nil?
+      @new_record = document.nil?
+      !@new_record
     end
 
   end
