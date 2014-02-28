@@ -74,4 +74,5 @@ module ATM::Concerns
   end
 end
 
+#ATM.send :include, ATM::Concerns
 ATM.include ATM::Concerns
