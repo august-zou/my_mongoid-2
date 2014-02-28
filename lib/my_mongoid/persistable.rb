@@ -14,7 +14,7 @@ module MyMongoid
         attributes = attrs || {}
         doc = allocate
         doc.instance_variable_set(:@attributes, attributes)
-        doc.instance_variable_set(:@persisted, true)
+        doc.instance_variable_set(:@new_record, false)
         doc
       end
 
@@ -28,10 +28,48 @@ module MyMongoid
     end
 
     def save
+      if new_record?
+        !insert.new_record?
+      else
+        update_document
+      end
+    end
+
+    def insert
       @attributes["_id"] ||= BSON::ObjectId.new
-      document = collection.insert(to_document)
-      @new_record = document.nil?
-      !@new_record
+      changed_attributes = {} # reset
+      doc = collection.insert(to_document)
+      @new_record = doc.nil?
+      self.class.instantiate(doc)
+    end
+
+    def update_attributes(attr)
+      raise ArgumentError unless attr.is_a? Hash
+      attr.each_pair { |k, v| send("#{k}=", v) }
+      save
+    end
+
+    def delete
+      selector = { "_id" => self.id }
+      self.deleted = true
+      self.class.collection.find(selector).remove
+    end
+
+    def deleted?
+      @deleted ||= false
+    end
+
+    def update_document
+      updates = atomic_updates
+
+      unless updates.empty?
+        selector = { "_id" => self.id }
+        collection.find(selector).update(updates)
+      end
+    end
+
+    def changed?
+      !changed_attributes.empty?
     end
 
   end

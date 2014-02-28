@@ -10,7 +10,7 @@ module MyMongoid
     include Persistable
 
     attr_reader :attributes
-    attr_accessor :new_record # state
+    attr_accessor :new_record, :deleted # state
 
     module ClassMethods
       def is_mongoid_model?
@@ -45,7 +45,7 @@ module MyMongoid
         define_method(meth) { @attributes[name] }
 
         define_method(meth + '=') do |value|
-          @attributes[name] = value
+          write_attribute(name, value)
         end
       end
 
@@ -103,7 +103,14 @@ module MyMongoid
     end
 
     def write_attribute(name, value)
+      if value != attributes[name] && changed_attributes[name] != attributes[name]
+        changed_attributes[name] = attributes[name] unless changed_attributes.has_key?(name)
+      end
       @attributes[name] = value
+    end
+
+    def changed_attributes
+      @changed_attributes ||= {}
     end
 
     def new_record?
@@ -117,6 +124,14 @@ module MyMongoid
     def collection
       self.class.collection
     end
+
+    def atomic_updates
+      return {} if new_record?
+      updates = changed_attributes.select {|k, v| k != '_id' }
+      updates.each { |k, v| updates[k] = attributes[k] }
+      updates.empty? ? {} : { "$set" => updates }
+    end
+
   end
 
   class Field
