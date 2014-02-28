@@ -377,10 +377,23 @@ describe MyMongoid do
 
   describe "Should be able to delete a record" do
     describe "#delete" do
+      before(:all) {
+        config_db
+      }
+
+      let(:bar) {
+        BarModel.create({ "a" => 1 })
+      }
       it "should delete a record from db" do
+        id = bar.id
+        expect(BarModel.collection.find({ "_id" => id }).count()).to eq(1)
+        bar.delete
+        expect(BarModel.collection.find({ "_id" => id }).count()).to eq(0)
       end
 
       it "should return true for deleted?" do
+        bar.delete
+        expect(bar).to be_deleted
       end
     end
   end

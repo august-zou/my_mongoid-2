@@ -10,7 +10,7 @@ module MyMongoid
     include Persistable
 
     attr_reader :attributes
-    attr_accessor :new_record # state
+    attr_accessor :new_record, :deleted # state
 
     module ClassMethods
       def is_mongoid_model?

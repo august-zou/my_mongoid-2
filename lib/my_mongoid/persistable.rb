@@ -49,6 +49,16 @@ module MyMongoid
       save
     end
 
+    def delete
+      selector = { "_id" => self.id }
+      self.deleted = true
+      self.class.collection.find(selector).remove
+    end
+
+    def deleted?
+      @deleted ||= false
+    end
+
     def update_document
       updates = atomic_updates
 
