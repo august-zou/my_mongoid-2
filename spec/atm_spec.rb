@@ -8,13 +8,19 @@ require 'atm'
 # end
 
 describe ATM do
+  before(:all) {
+    class ATM
+      define_atm_callbacks :deposit, :withdraw
+    end
+  }
   describe "declare callback hooks" do
     let(:klass) {
       ATM
     }
-
-    before(:all) {
-      ATM.send(:define_callbacks, :deposit)
+    before(:each) {
+      class ATM
+        reset_callbacks :deposit
+      end
     }
 
     it "should be able to register a :command_before callback" do
@@ -49,9 +55,14 @@ describe ATM do
 
     let(:atm) { ATM.new(account) }
 
+    before(:each) {
+      class ATM
+        reset_callbacks :deposit
+      end
+    }
+
     it "should log around #deposit" do
       ATM.class_eval do
-        define_atm_callbacks :deposit, :withdraw
         command_around :deposit, ->(r, &block) { log("before log"); block.call; log("after log") }
       end
 
@@ -69,9 +80,14 @@ describe ATM do
 
     let(:atm) { ATM.new(account) }
 
+    before(:each) {
+      class ATM
+        reset_callbacks :deposit
+      end
+    }
+
     it "should invoke #send_sms after #deposit" do
       ATM.class_eval do
-        define_atm_callbacks :deposit, :withdraw
         command_after :deposit, :send_sms
       end
 
@@ -85,7 +101,7 @@ describe ATM do
 
     before(:each) do
       ATM.class_eval do
-        define_atm_callbacks :deposit, :withdraw
+        reset_callbacks :deposit
         command_before :deposit, :valid_access?
       end
     end
@@ -93,7 +109,7 @@ describe ATM do
     context "account.valid_access? returns true" do
 
       let(:account) {
-        account = Account.new(1000)
+        Account.new(1000)
       }
 
       let(:atm) {
@@ -107,7 +123,7 @@ describe ATM do
 
     context "account.valid_access? returns false" do
       let(:account) {
-        account = Account.new(1000, false)
+        Account.new(1000, false)
       }
 
       let(:atm) {
@@ -119,6 +135,9 @@ describe ATM do
       end
 
       it "should cancel after callbacks" do
+        ATM.send :command_after, :deposit, :send_sms
+        expect(account).not_to receive(:send_sms)
+        atm.deposit(100)
       end
     end
 

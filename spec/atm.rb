@@ -4,7 +4,7 @@ module Callbacks
   extend ActiveSupport::Concern
 
   included do
-    define_atm_callbacks :deposit, :withdraw
+    #define_atm_callbacks :deposit, :withdraw
   end
 
   module ClassMethods
@@ -53,7 +53,7 @@ class Account
   attr_reader :balance, :valid
   def initialize(balance, valid = true)
     @balance = balance
-    @valid = true
+    @valid = valid
   end
 
   def deposit(amount)
@@ -77,8 +77,8 @@ class ATM
 
   attr_reader :account
 
-  define_callbacks :deposit
-  command_around :deposit, ->(r, &block) { log("before log"); block.call; log("after log") }
+  #define_callbacks :deposit
+  #command_around :deposit, ->(r, &block) { log("before log"); block.call; log("after log") }
 
   def initialize(account)
     @account = account
@@ -118,8 +118,8 @@ end
 module ATM::SMSNotification
   extend ActiveSupport::Concern
 
-  def send_sms(msg)
-    puts "send FUCK"
+  def send_sms
+    puts "send something"
   end
 end
 
