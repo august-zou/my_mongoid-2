@@ -3,4 +3,6 @@ require "my_mongoid/document"
 require "my_mongoid/config"
 
 module MyMongoid
+  extend ActiveSupport::Concern
+
 end

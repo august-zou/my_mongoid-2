@@ -21,6 +21,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler", "~> 1.5"
   spec.add_development_dependency "rake"
   spec.add_dependency("moped", ["~> 2.0.beta6"])
-  spec.add_dependency("activesupport", ["~> 3.0.0"])
+  spec.add_dependency("activesupport", ["~> 4.0.3"])
+  spec.add_dependency("activemodel", ["~> 4.0.3"])
   spec.add_dependency("i18n")
 end

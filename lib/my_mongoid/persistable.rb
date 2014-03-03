@@ -3,7 +3,9 @@ module MyMongoid
   module Persistable
     extend ActiveSupport::Concern
 
+
     module ClassMethods
+     
       def create(attrs = {})
         model = self.new(attrs)
         model.save
@@ -28,10 +30,12 @@ module MyMongoid
     end
 
     def save
-      if new_record?
-        !insert.new_record?
-      else
-        update_document
+        run_callbacks :save do
+        if new_record?
+          !insert.new_record?
+        else
+          update_document
+        end
       end
     end
 

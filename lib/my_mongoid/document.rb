@@ -2,17 +2,27 @@ require 'my_mongoid/config'
 require 'my_mongoid/errors'
 require 'my_mongoid/persistable'
 
+require "active_model/callbacks"
+
 module MyMongoid
   # This is the base module for all domain objects
   module Document
     extend ActiveSupport::Concern
-
+    
     include Persistable
 
     attr_reader :attributes
     attr_accessor :new_record, :deleted # state
 
+    #call backs
+    included do
+      extend ActiveModel::Callbacks
+      define_model_callbacks :create, :update, :delete,:save
+      define_model_callbacks :initialize, :find, :only =>[:after]
+    end
+
     module ClassMethods
+
       def is_mongoid_model?
         true
       end
@@ -79,6 +89,7 @@ module MyMongoid
         c[k] = v.default_val; c
       end
       @attributes = defaults.merge(@attributes)
+      
     end
 
     def method_missing(meth, *args, &block)
