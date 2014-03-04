@@ -30,7 +30,7 @@ module MyMongoid
     end
 
     def save
-        run_callbacks :save do
+      run_callbacks :save do
         if new_record?
           !insert.new_record?
         else
@@ -40,11 +40,13 @@ module MyMongoid
     end
 
     def insert
-      @attributes["_id"] ||= BSON::ObjectId.new
-      changed_attributes = {} # reset
-      doc = collection.insert(to_document)
-      @new_record = doc.nil?
-      self.class.instantiate(doc)
+      run_callbacks :create do
+        @attributes["_id"] ||= BSON::ObjectId.new
+        changed_attributes = {} # reset
+        doc = collection.insert(to_document)
+        @new_record = doc.nil?
+        self.class.instantiate(doc)
+      end
     end
 
     def update_attributes(attr)

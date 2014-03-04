@@ -32,6 +32,10 @@ def clean_my_event_db
 end
 
 describe MyMongoid do
+  before {
+    config_db
+    clean_my_event_db
+  }
   describe "all hooks" do
     it "should declare before hook for delete" do
       expect {
@@ -188,19 +192,37 @@ describe MyMongoid do
     }
 
     let(:my_event){ MyEvent.new(attributes) }
-
-    before(:all){ config_db }
-    after(:all){ clean_my_event_db }
+    
     it "should run callbacks when saving a new record" do
+      expect(my_event).to receive(:create_foo)
+      my_event.save
+    end
 
+    it "should run callbacks when creating a new record" do
+      expect_any_instance_of(MyEvent).to receive(:create_foo)
+      MyEvent.create(attributes)
+    end
+  end
+
+  describe "run save callbacks" do
+    let(:attributes) {
+      {"public" => true, "created_at" => Time.parse("2014-02-13T03:20:37Z")}
+    }
+
+    let(:my_event){ MyEvent.new(attributes) }
+
+    it "should run callbacks when saving a new record" do
+      my_event
       expect(my_event).to receive(:save_foo)
       my_event.save
-
     end
-    it "should run callbacks when creating a new recor" do
-      expect( MyEvent.create(attributes)).to receive(:create_foo)
 
+    it "should run callbacks when saving a persisted record" do
+      my_event = MyEvent.create(attributes)
+      expect(my_event).to receive(:save_foo)
+      my_event.save
     end
+
   end
 
 end

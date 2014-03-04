@@ -17,7 +17,7 @@ module MyMongoid
     #call backs
     included do
       extend ActiveModel::Callbacks
-      define_model_callbacks :create, :update, :delete,:save
+      define_model_callbacks :create, :update, :delete, :save
       define_model_callbacks :initialize, :find, :only =>[:after]
     end
 
